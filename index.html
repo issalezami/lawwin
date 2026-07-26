@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>لَوِّن — مولّد ألوان ولوحات</title>
+<script>
+  try{
+    var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme',d?'dark':'light');
+  }catch(e){}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;700;800&family=Tajawal:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="light"]{
+    --bg:#F6F0FF;--dot:rgba(46,16,101,.13);--surface:#FFFFFF;--ink:#2E1065;--muted:#6D4AAE;
+    --line:#2E1065;--dash:rgba(46,16,101,.35);--dash-strong:rgba(46,16,101,.5);
+    --code-bg:#F6F0FF;--add-bg:rgba(255,255,255,.55);--on-bg:#2E1065;--on-fg:#FFFFFF;
+    --toast-bg:#2E1065;--toast-fg:#FFFFFF;--shadow:#2E1065;--pink:#FF3D8D;--sun:#FFC93C;
+    --veil:rgba(46,16,101,.72);
+  }
+  :root[data-theme="dark"]{
+    --bg:#140B2C;--dot:rgba(196,181,253,.17);--surface:#241442;--ink:#F1EAFF;--muted:#B9A7EA;
+    --line:#C4B5FD;--dash:rgba(196,181,253,.4);--dash-strong:rgba(196,181,253,.55);
+    --code-bg:#1A0E37;--add-bg:rgba(36,20,66,.55);--on-bg:#C4B5FD;--on-fg:#1A0E37;
+    --toast-bg:#C4B5FD;--toast-fg:#1A0E37;--shadow:#0B0518;--pink:#FF5C9E;--sun:#FFD45C;
+    --veil:rgba(10,5,24,.8);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 0);
+    background-size:22px 22px;color:var(--ink);
+    font-family:"Tajawal",system-ui,sans-serif;min-height:100vh;padding-bottom:4rem;
+    transition:background-color .25s ease,color .25s ease;
+  }
+  button{font-family:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid var(--pink);outline-offset:3px;border-radius:8px}
+  ::selection{background:var(--sun);color:#2E1065}
+
+  header{max-width:1180px;margin:0 auto;padding:2.4rem 1.2rem 1.4rem;text-align:center}
+  .logo{font-family:"Baloo Bhaijaan 2",cursive;font-weight:800;font-size:clamp(2.8rem,8vw,4.6rem);line-height:1.05;letter-spacing:-.01em}
+  .logo em{font-style:normal;position:relative;display:inline-block}
+  .logo em::after{content:"";position:absolute;inset-inline:0;bottom:.12em;height:.16em;background:var(--sun);border-radius:99px;z-index:-1}
+  .tag{font-size:1rem;font-weight:500;margin-top:.3rem;color:var(--muted)}
+
+  .panel{max-width:1180px;margin:1.6rem auto 0;padding:0 1.2rem;display:flex;flex-wrap:wrap;gap:.9rem;align-items:center;justify-content:center}
+  .chips{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;background:var(--surface);border:2.5px solid var(--line);border-radius:99px;padding:.35rem;box-shadow:0 5px 0 var(--shadow)}
+  .chips button{border:0;background:transparent;border-radius:99px;padding:.45rem 1rem;font-size:.92rem;font-weight:500;transition:transform .12s ease,background-color .15s ease}
+  .chips button[aria-pressed="true"]{background:var(--on-bg);color:var(--on-fg);font-weight:700}
+  .chips button:active{transform:scale(.94)}
+
+  .big{border:2.5px solid var(--line);border-radius:99px;background:var(--pink);color:#FFFFFF;font-family:"Baloo Bhaijaan 2",cursive;font-weight:700;font-size:1.15rem;padding:.6rem 1.7rem .75rem;box-shadow:0 5px 0 var(--shadow);transition:transform .1s ease,box-shadow .1s ease}
+  .big:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--shadow)}
+  .big:active{transform:translateY(4px);box-shadow:0 1px 0 var(--shadow)}
+  .ghost{border:2.5px solid var(--line);border-radius:99px;background:var(--surface);font-weight:500;font-size:.92rem;padding:.55rem 1.2rem;box-shadow:0 5px 0 var(--shadow);transition:transform .1s ease,box-shadow .1s ease}
+  .ghost:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--shadow)}
+  .ghost:active{transform:translateY(4px);box-shadow:0 1px 0 var(--shadow)}
+
+  /* ===== رفع الصورة ===== */
+  .upload{max-width:1180px;margin:1.7rem auto 0;padding:0 1.2rem}
+  .drop{
+    display:flex;flex-direction:column;align-items:center;gap:.25rem;text-align:center;
+    border:3px dashed var(--dash-strong);border-radius:22px;background:var(--add-bg);
+    padding:1.5rem 1rem;cursor:pointer;
+    transition:border-color .15s ease,background-color .15s ease,transform .15s ease;
+  }
+  .drop:hover,.drop.over{border-color:var(--pink);background:var(--surface);transform:translateY(-3px)}
+  .drop .ico{font-size:1.8rem;line-height:1}
+  .drop b{font-family:"Baloo Bhaijaan 2",cursive;font-weight:700;font-size:1.15rem}
+  .drop span{font-size:.82rem;color:var(--muted)}
+  .shot{display:flex;align-items:center;gap:.9rem;background:var(--surface);border:2.5px solid var(--line);border-radius:22px;box-shadow:0 6px 0 var(--shadow);padding:.7rem}
+  .shot canvas{width:74px;height:74px;border-radius:14px;border:2.5px solid var(--line);flex-shrink:0;display:block;background:var(--code-bg)}
+  .shot .meta{flex:1;min-width:0}
+  .shot .meta b{display:block;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .shot .meta span{font-size:.8rem;color:var(--muted)}
+  .overlay{position:fixed;inset:0;background:var(--veil);display:none;place-items:center;z-index:60}
+  .overlay.show{display:grid}
+  .overlay div{border:3px dashed #fff;color:#fff;font-family:"Baloo Bhaijaan 2",cursive;font-weight:700;font-size:clamp(1.1rem,4vw,1.6rem);padding:2.2rem 2.6rem;border-radius:28px}
+
+
+  .corner{
+    position:fixed;top:1rem;left:1rem;z-index:55;
+    display:flex;align-items:center;gap:.15rem;
+    background:var(--surface);border:2.5px solid var(--line);border-radius:99px;
+    padding:.3rem;box-shadow:0 5px 0 var(--shadow);
+    transition:background-color .25s ease,border-color .25s ease,box-shadow .25s ease;
+  }
+  .corner .globe{font-size:.92rem;padding-inline-start:.55rem;line-height:1;opacity:.8}
+  .corner select{
+    appearance:none;-webkit-appearance:none;border:0;background:transparent;
+    font-family:"Tajawal",sans-serif;font-size:.8rem;font-weight:500;color:var(--ink);
+    padding:.42rem .3rem;cursor:pointer;max-width:98px;
+  }
+  .corner select:focus-visible{outline:2px solid var(--pink);outline-offset:2px;border-radius:8px}
+  .corner .sep{width:2px;align-self:stretch;margin:.28rem .12rem;background:var(--dash);border-radius:2px}
+  .corner .modeBtn{
+    width:32px;height:32px;border-radius:50%;flex-shrink:0;
+    border:2px solid var(--line);background:var(--code-bg);
+    display:grid;place-items:center;font-size:.92rem;line-height:1;
+    transition:transform .15s ease,background-color .15s ease;
+  }
+  .corner .modeBtn:hover{transform:rotate(-12deg) scale(1.08);background:var(--sun)}
+  @media (max-width:640px){
+    .corner{top:.6rem;left:.6rem;padding:.25rem}
+    .corner .globe{padding-inline-start:.4rem;font-size:.82rem}
+    .corner select{max-width:60px;font-size:.7rem;padding:.36rem .2rem}
+    .corner .modeBtn{width:28px;height:28px}
+  }
+
+  .grid{max-width:1180px;margin:1.8rem auto 0;padding:0 1.2rem;display:grid;gap:1.4rem;grid-template-columns:repeat(auto-fit,minmax(195px,1fr))}
+  .card{background:var(--surface);border:2.5px solid var(--line);border-radius:22px;box-shadow:0 8px 0 var(--shadow);overflow:hidden;position:relative;transition:transform .18s cubic-bezier(.34,1.4,.5,1),box-shadow .18s ease}
+  .card:hover{transform:translateY(-6px) rotate(0deg) !important;box-shadow:0 14px 0 var(--shadow)}
+  .well{height:180px;position:relative;width:100%;border:0;display:flex;align-items:flex-end;justify-content:space-between;padding:.8rem;border-bottom:2.5px solid var(--line);cursor:pointer}
+  .badge{font-family:"Baloo Bhaijaan 2",cursive;font-weight:700;font-size:1.05rem;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:99px;padding:.15rem .8rem .3rem;box-shadow:0 3px 0 var(--shadow)}
+  .pin{position:absolute;top:.7rem;inset-inline-end:.7rem;width:38px;height:38px;border-radius:50%;border:2.5px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:1.05rem;line-height:1;box-shadow:0 3px 0 var(--shadow);transition:transform .15s ease}
+  .pin:hover{transform:rotate(-12deg) scale(1.08)}
+  .card.locked .pin{background:var(--sun)}
+  .card.locked{box-shadow:0 8px 0 var(--shadow),0 0 0 4px var(--sun)}
+  .kill{position:absolute;top:.7rem;inset-inline-start:.7rem;width:32px;height:32px;border-radius:50%;border:2.5px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:1rem;font-weight:700;line-height:1;box-shadow:0 3px 0 var(--shadow);opacity:0;transition:opacity .15s ease,transform .15s ease}
+  .card:hover .kill,.card:focus-within .kill{opacity:1}
+  .kill:hover{transform:rotate(90deg)}
+  .foot{padding:.9rem .9rem 1rem;display:flex;flex-direction:column;gap:.55rem}
+  .code{font-family:"Space Mono",monospace;font-weight:700;font-size:1.15rem;letter-spacing:.02em;direction:ltr;text-align:center;background:var(--code-bg);border:2px dashed var(--dash);border-radius:12px;padding:.5rem .3rem;width:100%;transition:background-color .15s ease,color .15s ease}
+  .code:hover{background:var(--sun);color:#2E1065}
+  .shadesBtn{border:0;background:transparent;font-size:.82rem;font-weight:500;color:var(--muted);text-decoration:underline;text-underline-offset:3px;align-self:center}
+  .shades{display:none;gap:.35rem}
+  .card.open .shades{display:flex}
+  .shades button{flex:1;height:38px;border:2px solid var(--line);border-radius:9px;font-size:0;transition:transform .12s ease}
+  .shades button:hover{transform:translateY(-4px) scale(1.06)}
+
+  .knob{display:flex;align-items:center;gap:.55rem;background:var(--surface);border:2.5px solid var(--line);border-radius:99px;padding:.42rem .95rem;box-shadow:0 5px 0 var(--shadow)}
+  .knob .lbl{font-size:.82rem;color:var(--muted);white-space:nowrap}
+  .knob b{font-family:"Space Mono",monospace;font-size:.9rem;min-width:4ch;text-align:center}
+  .knob input[type=range]{width:104px;accent-color:var(--pink);cursor:pointer}
+  .add{border:2.5px dashed var(--dash-strong);border-radius:22px;background:var(--add-bg);min-height:210px;display:grid;place-items:center;gap:.3rem;font-family:"Baloo Bhaijaan 2",cursive;font-weight:700;font-size:1.1rem;color:var(--muted);transition:background-color .15s ease,transform .15s ease}
+  .add:hover{background:var(--surface);transform:translateY(-4px)}
+  .add span{font-size:2rem;line-height:1}
+
+  .hints{max-width:1180px;margin:2.4rem auto 0;padding:0 1.2rem;display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center}
+  .hints span{background:var(--surface);border:2px solid var(--line);border-radius:99px;padding:.35rem 1rem;font-size:.82rem;box-shadow:0 3px 0 var(--shadow)}
+
+  .toast{position:fixed;bottom:1.6rem;left:50%;transform:translateX(-50%) translateY(2rem) rotate(-2deg);background:var(--toast-bg);color:var(--toast-fg);border:2.5px solid var(--line);border-radius:99px;padding:.65rem 1.3rem;font-weight:500;display:flex;align-items:center;gap:.6rem;box-shadow:0 6px 0 var(--shadow);opacity:0;pointer-events:none;z-index:70;max-width:92vw;transition:opacity .18s ease,transform .22s cubic-bezier(.34,1.5,.5,1)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0) rotate(-2deg)}
+  .toast code{font-family:"Space Mono",monospace;direction:ltr;font-weight:700}
+  .toast i{width:16px;height:16px;border-radius:5px;border:2px solid var(--toast-fg);display:block;flex-shrink:0}
+
+  @keyframes drop{0%{opacity:0;transform:translateY(-26px) scale(.9) rotate(0)}100%{opacity:1;transform:none}}
+  .card{animation:drop .42s cubic-bezier(.34,1.4,.5,1) backwards}
+
+  @media (max-width:520px){.well{height:150px}.hints{display:none}}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}.card{transform:none !important}}
+</style>
+</head>
+<body>
+
+<div class="corner" id="corner">
+  <span class="globe" aria-hidden="true">🌐</span>
+  <select id="lang" aria-label="اللغة"></select>
+  <span class="sep" aria-hidden="true"></span>
+  <button class="modeBtn" id="theme" type="button" aria-pressed="false">
+    <span class="ico">🌙</span>
+  </button>
+</div>
+
+<header>
+  <div class="logo" id="logo">لَـوِّ<em>ن</em></div>
+  <p class="tag" data-i18n="tagline"></p>
+</header>
+
+<div class="panel">
+  <div class="chips" id="harmony" role="group" aria-label="نمط التناغم">
+    <button data-h="random" data-i18n="random" aria-pressed="true"></button>
+    <button data-h="analogous" data-i18n="analogous" aria-pressed="false"></button>
+    <button data-h="complement" data-i18n="complement" aria-pressed="false"></button>
+    <button data-h="triad" data-i18n="triad" aria-pressed="false"></button>
+    <button data-h="mono" data-i18n="mono" aria-pressed="false"></button>
+  </div>
+
+  <div class="chips" id="format" role="group" aria-label="صيغة اللون">
+    <button data-f="hex" aria-pressed="true">HEX</button>
+    <button data-f="rgb" aria-pressed="false">RGB</button>
+    <button data-f="hsl" aria-pressed="false">HSL</button>
+  </div>
+
+  <button class="big" id="gen" data-i18n="generate"></button>
+  <button class="ghost" id="copyAll" data-i18n="copyAll"></button>
+  <button class="ghost" id="copyCss" data-i18n="copyCss"></button>
+
+  <div class="knob">
+    <span class="lbl">انزياح التباين</span>
+    <input type="range" id="shift" min="-0.5" max="0.5" step="0.02" value="0" aria-label="انزياح التباين">
+    <b id="shiftVal">0.00</b>
+  </div>
+</div>
+
+<div class="upload">
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept="image/*" hidden>
+    <span class="ico">🖼️</span>
+    <b data-i18n="drop_title"></b>
+    <span data-i18n="drop_sub"></span>
+  </label>
+  <div class="shot" id="shot" hidden>
+    <canvas id="thumb" width="148" height="148" role="img" aria-label="الصورة التي استُخرجت منها الألوان"></canvas>
+    <div class="meta"><b id="shotName"></b><span data-i18n="from_image"></span></div>
+    <button class="ghost" id="clearShot" data-i18n="drop_remove"></button>
+  </div>
+</div>
+
+<main class="grid" id="grid"></main>
+
+<div class="hints">
+  <span data-i18n="hint1"></span>
+  <span data-i18n="hint2"></span>
+  <span data-i18n="hint_shades"></span>
+  <span data-i18n="hint3"></span>
+</div>
+
+<div class="overlay" id="overlay"><div data-i18n="overlay"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== اللغات ===== */
+const I18N={"ar":{"tagline":"وَلِّد لوحة ألوان أو استخرجها من صورة، وانسخ الرمز بنقرة","random":"عشوائي","analogous":"متقارب","complement":"متمّم","triad":"ثلاثي","mono":"أحادي","generate":"وَلِّد لوحة ✨","copyAll":"نسخ الكل","copyCss":"نسخ CSS","theme_dark":"الوضع الداكن","theme_light":"الوضع الفاتح","drop_title":"اسحب صورة هنا لاستخراج ألوانها","drop_sub":"أو انقر للاختيار من جهازك — ويمكنك لصق صورة بـ Ctrl+V","from_image":"استُخرجت الألوان من هذه الصورة","drop_remove":"إزالة","hint1":"انقر المربّع أو الرمز لنسخه","hint2":"📌 يقفل اللون فلا يتغيّر","hint_shades":"«الدرجات» تفتح خمس درجات","hint3":"زر المسافة يولّد لوحة جديدة","overlay":"أفلت الصورة لاستخراج ألوانها","shades":"الدرجات","shades_hide":"إخفاء الدرجات","add_color":"أضف لونًا","t_notimg":"الملف ليس صورة","t_extracted":"استُخرجت الألوان من الصورة 🖼️","t_decode":"تعذّر فك ترميز الصورة — جرّب صيغة JPG أو PNG","t_removed":"أُزيلت الصورة","t_copied":"نُسخ","t_copy_fail":"تعذّر النسخ — انسخه يدويًا","language":"اللغة"},"en":{"tagline":"Generate a palette or pull one from an image, then copy any code","random":"Random","analogous":"Analogous","complement":"Complement","triad":"Triad","mono":"Mono","generate":"Generate ✨","copyAll":"Copy all","copyCss":"Copy CSS","theme_dark":"Dark mode","theme_light":"Light mode","drop_title":"Drop an image to extract its colors","drop_sub":"Or click to choose from your device — pasting with Ctrl+V works too","from_image":"Colors extracted from this image","drop_remove":"Remove","hint1":"Click a swatch or its code to copy","hint2":"📌 locks a color in place","hint_shades":"“Shades” reveals five tints","hint3":"Space generates a new palette","overlay":"Drop to extract colors","shades":"Shades","shades_hide":"Hide shades","add_color":"Add color","t_notimg":"That file is not an image","t_extracted":"Colors extracted 🖼️","t_decode":"Could not decode the image — try JPG or PNG","t_removed":"Image removed","t_copied":"Copied","t_copy_fail":"Couldn't copy — copy it manually","language":"Language"},"fr":{"tagline":"Générez une palette ou extrayez-la d'une image, puis copiez le code","random":"Aléatoire","analogous":"Analogues","complement":"Complémentaire","triad":"Triade","mono":"Monochrome","generate":"Générer ✨","copyAll":"Tout copier","copyCss":"Copier le CSS","theme_dark":"Mode sombre","theme_light":"Mode clair","drop_title":"Déposez une image pour en extraire les couleurs","drop_sub":"Ou cliquez pour choisir depuis votre appareil — Ctrl+V fonctionne aussi","from_image":"Couleurs extraites de cette image","drop_remove":"Retirer","hint1":"Cliquez pour copier","hint2":"📌 verrouille une couleur","hint_shades":"« Nuances » ouvre cinq tons","hint3":"Espace génère une palette","overlay":"Déposez pour extraire","shades":"Nuances","shades_hide":"Masquer","add_color":"Ajouter","t_notimg":"Ce fichier n'est pas une image","t_extracted":"Couleurs extraites 🖼️","t_decode":"Impossible de décoder l'image — essayez JPG ou PNG","t_removed":"Image retirée","t_copied":"Copié","t_copy_fail":"Échec de la copie — copiez-le manuellement","language":"Langue"},"es":{"tagline":"Genera una paleta o extráela de una imagen y copia el código","random":"Aleatorio","analogous":"Análogos","complement":"Complementario","triad":"Tríada","mono":"Monocromo","generate":"Generar ✨","copyAll":"Copiar todo","copyCss":"Copiar CSS","theme_dark":"Modo oscuro","theme_light":"Modo claro","drop_title":"Suelta una imagen para extraer sus colores","drop_sub":"O haz clic para elegir desde tu dispositivo — Ctrl+V también funciona","from_image":"Colores extraídos de esta imagen","drop_remove":"Quitar","hint1":"Haz clic para copiar","hint2":"📌 bloquea un color","hint_shades":"«Tonos» abre cinco variantes","hint3":"Espacio genera una paleta","overlay":"Suelta para extraer","shades":"Tonos","shades_hide":"Ocultar","add_color":"Añadir","t_notimg":"Ese archivo no es una imagen","t_extracted":"Colores extraídos 🖼️","t_decode":"No se pudo decodificar la imagen — prueba JPG o PNG","t_removed":"Imagen quitada","t_copied":"Copiado","t_copy_fail":"No se pudo copiar — cópialo manualmente","language":"Idioma"},"de":{"tagline":"Erzeuge eine Palette oder lies sie aus einem Bild und kopiere den Code","random":"Zufällig","analogous":"Analog","complement":"Komplementär","triad":"Triade","mono":"Monochrom","generate":"Erzeugen ✨","copyAll":"Alle kopieren","copyCss":"CSS kopieren","theme_dark":"Dunkelmodus","theme_light":"Hellmodus","drop_title":"Bild ablegen, um Farben zu entnehmen","drop_sub":"Oder klicke, um vom Gerät auszuwählen — Ctrl+V funktioniert auch","from_image":"Farben aus diesem Bild entnommen","drop_remove":"Entfernen","hint1":"Zum Kopieren klicken","hint2":"📌 sperrt eine Farbe","hint_shades":"„Abstufungen“ öffnet fünf Töne","hint3":"Leertaste erzeugt eine Palette","overlay":"Ablegen zum Entnehmen","shades":"Abstufungen","shades_hide":"Ausblenden","add_color":"Hinzufügen","t_notimg":"Diese Datei ist kein Bild","t_extracted":"Farben entnommen 🖼️","t_decode":"Bild nicht lesbar — versuche JPG oder PNG","t_removed":"Bild entfernt","t_copied":"Kopiert","t_copy_fail":"Kopieren fehlgeschlagen — bitte manuell kopieren","language":"Sprache"},"pt":{"tagline":"Gere uma paleta ou extraia-a de uma imagem e copie o código","random":"Aleatório","analogous":"Análogos","complement":"Complementar","triad":"Tríade","mono":"Monocromo","generate":"Gerar ✨","copyAll":"Copiar tudo","copyCss":"Copiar CSS","theme_dark":"Modo escuro","theme_light":"Modo claro","drop_title":"Solte uma imagem para extrair as cores","drop_sub":"Ou clique para escolher do seu dispositivo — Ctrl+V também funciona","from_image":"Cores extraídas desta imagem","drop_remove":"Remover","hint1":"Clique para copiar","hint2":"📌 trava uma cor","hint_shades":"«Tons» abre cinco variações","hint3":"Espaço gera uma paleta","overlay":"Solte para extrair","shades":"Tons","shades_hide":"Ocultar","add_color":"Adicionar","t_notimg":"Esse arquivo não é uma imagem","t_extracted":"Cores extraídas 🖼️","t_decode":"Não foi possível decodificar a imagem — tente JPG ou PNG","t_removed":"Imagem removida","t_copied":"Copiado","t_copy_fail":"Falha ao copiar — copie manualmente","language":"Idioma"},"tr":{"tagline":"Palet üret ya da bir görselden çıkar, kodu tek tıkla kopyala","random":"Rastgele","analogous":"Analog","complement":"Tamamlayıcı","triad":"Üçlü","mono":"Tek renk","generate":"Üret ✨","copyAll":"Tümünü kopyala","copyCss":"CSS kopyala","theme_dark":"Koyu tema","theme_light":"Açık tema","drop_title":"Renklerini çıkarmak için bir görsel bırakın","drop_sub":"Ya da cihazından seçmek için tıkla — Ctrl+V ile yapıştırmak da olur","from_image":"Renkler bu görselden çıkarıldı","drop_remove":"Kaldır","hint1":"Kopyalamak için tıklayın","hint2":"📌 rengi sabitler","hint_shades":"“Tonlar” beş ton açar","hint3":"Boşluk yeni palet üretir","overlay":"Çıkarmak için bırakın","shades":"Tonlar","shades_hide":"Gizle","add_color":"Renk ekle","t_notimg":"Bu dosya bir görsel değil","t_extracted":"Renkler çıkarıldı 🖼️","t_decode":"Görsel çözülemedi — JPG veya PNG deneyin","t_removed":"Görsel kaldırıldı","t_copied":"Kopyalandı","t_copy_fail":"Kopyalanamadı — elle kopyalayın","language":"Dil"},"ru":{"tagline":"Создайте палитру или извлеките её из изображения и скопируйте код","random":"Случайные","analogous":"Аналогичные","complement":"Дополняющие","triad":"Триада","mono":"Монохром","generate":"Создать ✨","copyAll":"Копировать всё","copyCss":"Копировать CSS","theme_dark":"Тёмная тема","theme_light":"Светлая тема","drop_title":"Перетащите изображение, чтобы извлечь цвета","drop_sub":"Или нажмите, чтобы выбрать с устройства — Ctrl+V тоже работает","from_image":"Цвета извлечены из этого изображения","drop_remove":"Убрать","hint1":"Нажмите, чтобы скопировать","hint2":"📌 закрепляет цвет","hint_shades":"«Оттенки» открывает пять тонов","hint3":"Пробел создаёт палитру","overlay":"Отпустите, чтобы извлечь","shades":"Оттенки","shades_hide":"Скрыть","add_color":"Добавить","t_notimg":"Это не изображение","t_extracted":"Цвета извлечены 🖼️","t_decode":"Не удалось прочитать изображение — попробуйте JPG или PNG","t_removed":"Изображение убрано","t_copied":"Скопировано","t_copy_fail":"Не удалось скопировать — скопируйте вручную","language":"Язык"},"zh":{"tagline":"生成配色或从图片中提取，一键复制色值","random":"随机","analogous":"类比","complement":"互补","triad":"三色","mono":"单色","generate":"生成 ✨","copyAll":"全部复制","copyCss":"复制 CSS","theme_dark":"深色模式","theme_light":"浅色模式","drop_title":"拖入图片以提取配色","drop_sub":"或点击从设备选择 — 也支持 Ctrl+V 粘贴","from_image":"已从该图片提取配色","drop_remove":"移除","hint1":"点击色块或色值即可复制","hint2":"📌 锁定颜色","hint_shades":"「色阶」展开五个色调","hint3":"空格键生成新配色","overlay":"松开以提取配色","shades":"色阶","shades_hide":"隐藏色阶","add_color":"添加颜色","t_notimg":"该文件不是图片","t_extracted":"已提取配色 🖼️","t_decode":"无法解码图片 — 请试试 JPG 或 PNG","t_removed":"已移除图片","t_copied":"已复制","t_copy_fail":"复制失败 — 请手动复制","language":"语言"},"ja":{"tagline":"パレットを生成、または画像から抽出してコードをコピー","random":"ランダム","analogous":"類似","complement":"補色","triad":"トライアド","mono":"モノトーン","generate":"生成 ✨","copyAll":"すべてコピー","copyCss":"CSSをコピー","theme_dark":"ダークモード","theme_light":"ライトモード","drop_title":"画像をドロップして色を抽出","drop_sub":"またはクリックして端末から選択 — Ctrl+V の貼り付けにも対応","from_image":"この画像から抽出した色","drop_remove":"削除","hint1":"クリックでコピー","hint2":"📌 で色を固定","hint_shades":"「シェード」で5段階を表示","hint3":"スペースキーで再生成","overlay":"ドロップして抽出","shades":"シェード","shades_hide":"シェードを隠す","add_color":"色を追加","t_notimg":"画像ファイルではありません","t_extracted":"色を抽出しました 🖼️","t_decode":"画像を読み込めません — JPG か PNG をお試しください","t_removed":"画像を削除しました","t_copied":"コピーしました","t_copy_fail":"コピーできません — 手動でコピーしてください","language":"言語"},"fa":{"tagline":"یک پالت بسازید یا از تصویر استخراج کنید و کد را کپی کنید","random":"تصادفی","analogous":"مشابه","complement":"مکمل","triad":"سه‌گانه","mono":"تک‌رنگ","generate":"بساز ✨","copyAll":"کپی همه","copyCss":"کپی CSS","theme_dark":"حالت تیره","theme_light":"حالت روشن","drop_title":"تصویر را رها کنید تا رنگ‌ها استخراج شود","drop_sub":"یا برای انتخاب از دستگاه کلیک کنید — چسباندن با Ctrl+V هم کار می‌کند","from_image":"رنگ‌ها از این تصویر استخراج شد","drop_remove":"حذف","hint1":"برای کپی کلیک کنید","hint2":"📌 رنگ را قفل می‌کند","hint_shades":"«سایه‌ها» پنج طیف را باز می‌کند","hint3":"کلید فاصله پالت جدید می‌سازد","overlay":"رها کنید تا استخراج شود","shades":"سایه‌ها","shades_hide":"پنهان کردن","add_color":"افزودن رنگ","t_notimg":"این فایل تصویر نیست","t_extracted":"رنگ‌ها استخراج شد 🖼️","t_decode":"تصویر رمزگشایی نشد — JPG یا PNG را امتحان کنید","t_removed":"تصویر حذف شد","t_copied":"کپی شد","t_copy_fail":"کپی نشد — به‌صورت دستی کپی کنید","language":"زبان"},"ur":{"tagline":"پیلٹ بنائیں یا تصویر سے نکالیں اور کوڈ کاپی کریں","random":"بے ترتیب","analogous":"ملتے جلتے","complement":"تکمیلی","triad":"تہرا","mono":"یک رنگ","generate":"بنائیں ✨","copyAll":"سب کاپی","copyCss":"CSS کاپی کریں","theme_dark":"ڈارک موڈ","theme_light":"لائٹ موڈ","drop_title":"رنگ نکالنے کے لیے تصویر یہاں چھوڑیں","drop_sub":"یا آلے سے منتخب کرنے کے لیے کلک کریں — Ctrl+V سے پیسٹ بھی چل جاتا ہے","from_image":"اس تصویر سے رنگ نکالے گئے","drop_remove":"ہٹائیں","hint1":"کاپی کے لیے کلک کریں","hint2":"📌 رنگ کو مقفل کرتا ہے","hint_shades":"”شیڈز“ پانچ درجے کھولتا ہے","hint3":"اسپیس نیا پیلٹ بناتا ہے","overlay":"نکالنے کے لیے چھوڑیں","shades":"شیڈز","shades_hide":"چھپائیں","add_color":"رنگ شامل کریں","t_notimg":"یہ فائل تصویر نہیں ہے","t_extracted":"رنگ نکال لیے گئے 🖼️","t_decode":"تصویر ڈی کوڈ نہیں ہو سکی — JPG یا PNG آزمائیں","t_removed":"تصویر ہٹا دی گئی","t_copied":"کاپی ہو گیا","t_copy_fail":"کاپی نہیں ہو سکا — دستی طور پر کاپی کریں","language":"زبان"}};
+const LANG_NAMES={ar:'العربية',en:'English',fr:'Français',es:'Español',de:'Deutsch',
+  pt:'Português',tr:'Türkçe',ru:'Русский',zh:'中文',ja:'日本語',fa:'فارسی',ur:'اردو'};
+const RTL=['ar','fa','ur'];
+let lang='ar';
+const t=k=>(I18N[lang]&&I18N[lang][k])||I18N.en[k]||k;
+function applyLang(){
+  const rtl=RTL.indexOf(lang)>=0;
+  document.documentElement.lang=lang;
+  document.documentElement.dir=rtl?'rtl':'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.getAttribute('data-i18n'));});
+  document.getElementById('logo').innerHTML=rtl?'لَـوِّ<em>ن</em>':'Lawwi<em>n</em>';
+  paintThemeBtn();render();
+}
+
+/* ===== أسماء عربية للألوان ===== */
+const NAMES=[["أسود","#000000"],["فحمي","#36454F"],["رصاصي","#7C7C80"],["فضّي","#C0C0C0"],
+["أبيض","#FFFFFF"],["عاجي","#FFFFF0"],["لؤلؤي","#EAE0C8"],["كريمي","#FFFDD0"],["بيج","#F5F5DC"],
+["رملي","#C2B280"],["طحيني","#D2B48C"],["كاكي","#C3B091"],["بنّي","#8B5A2B"],["بنّي داكن","#5C4033"],
+["كستنائي","#954535"],["قرفي","#D2691E"],["نحاسي","#B87333"],["برونزي","#CD7F32"],["ذهبي","#D4AF37"],
+["خردلي","#E1AD01"],["زعفراني","#F4C430"],["أصفر","#FFE800"],["ليموني","#FFF44F"],["مشمشي","#FBCEB1"],
+["خوخي","#FFE5B4"],["برتقالي","#FF7F00"],["مرجاني","#FF7F50"],["طوبي","#B22222"],["أحمر","#EE1C25"],
+["قرمزي","#DC143C"],["عنّابي","#7B1E28"],["خمري","#722F37"],["وردي","#FFC0CB"],["فوشيا","#FF3E96"],
+["بنفسجي","#8F00FF"],["أرجواني","#6A0DAD"],["خُزامى","#B57EDC"],["نيلي","#4B0082"],["كحلي","#0B1E4A"],
+["أزرق","#1F4FD8"],["بحري","#006994"],["سماوي","#87CEEB"],["فيروزي","#40E0D0"],["مائي","#7FFFD4"],
+["نعناعي","#98FF98"],["زمرّدي","#50C878"],["أخضر","#1E8A3C"],["عشبي","#7CBA36"],["زيتوني","#7A7B34"],
+["حِنّائي","#A55D35"]].map(([n,h])=>({n,rgb:hexToRgb(h)}));
+
+function hexToRgb(h){h=h.replace('#','');return{r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};}
+function hslToRgb(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  return{r:Math.round(f(0)*255),g:Math.round(f(8)*255),b:Math.round(f(4)*255)};}
+function rgbToHsl(r,g,b){const R=r/255,G=g/255,B=b/255;
+  const mx=Math.max(R,G,B),mn=Math.min(R,G,B),l=(mx+mn)/2,d=mx-mn;let h=0,s=0;
+  if(d){s=d/(1-Math.abs(2*l-1));h=mx===R?60*(((G-B)/d)%6):mx===G?60*((B-R)/d+2):60*((R-G)/d+4);}
+  return{h:(h+360)%360,s:s*100,l:l*100};}
+const pad=v=>v.toString(16).padStart(2,'0');
+const hexOf=c=>{const{r,g,b}=hslToRgb(c.h,c.s,c.l);return('#'+pad(r)+pad(g)+pad(b)).toUpperCase();};
+function fmtOf(c,f){const{r,g,b}=hslToRgb(c.h,c.s,c.l);
+  if(f==='rgb')return`rgb(${r}, ${g}, ${b})`;
+  if(f==='hsl')return`hsl(${Math.round(c.h)}, ${Math.round(c.s)}%, ${Math.round(c.l)}%)`;
+  return hexOf(c);}
+function nearestName(c){const{r,g,b}=hslToRgb(c.h,c.s,c.l);let best=NAMES[0],bd=Infinity;
+  for(const o of NAMES){const rm=(r+o.rgb.r)/2,dr=r-o.rgb.r,dg=g-o.rgb.g,db=b-o.rgb.b;
+    const d=(2+rm/256)*dr*dr+4*dg*dg+(2+(255-rm)/256)*db*db;
+    if(d<bd){bd=d;best=o;}}
+  return best.n;}
+
+/* ===== السمة ===== */
+const root=document.documentElement;
+const themeBtn=document.getElementById('theme');
+const isDark=()=>root.getAttribute('data-theme')==='dark';
+function paintThemeBtn(){
+  const dark=isDark();
+  themeBtn.setAttribute('aria-pressed',dark);
+  themeBtn.querySelector('.ico').textContent=dark?'☀️':'🌙';
+  themeBtn.setAttribute('aria-label',dark?t('theme_light'):t('theme_dark'));
+}
+themeBtn.addEventListener('click',()=>{
+  const dark=isDark();
+  root.setAttribute('data-theme',dark?'light':'dark');
+  paintThemeBtn();
+  if(!imageMode)render();else{render();}
+  toast((dark?t('theme_light'):t('theme_dark'))+(dark?' ☀️':' 🌙'));
+});
+paintThemeBtn();
+
+/* ===== الحالة ===== */
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const TILT=[-2.1,1.5,-1.2,2,-1.6,1.1,-.9];
+let colors=[],fmt='hex',mode='random',shift=0;
+
+/* انزياح التباين يغيّر أُسّ منحنى الإضاءة، فتتكثّف الدرجات
+   في الطرف الفاتح (قيمة سالبة) أو الداكن (قيمة موجبة) */
+function shadeLevels(){
+  const g=Math.pow(2,-shift*2);
+  return [0,0.25,0.5,0.75,1].map(tt=>90-Math.pow(tt,g)*68);
+}
+let pixels=null,imageMode=false;
+const grid=document.getElementById('grid');
+
+function build(n){
+  const locked=colors.find(c=>c.locked);
+  const base=locked?locked.h:rnd(0,360);
+  const dk=isDark(),top=dk?76:86,span=dk?48:58,sB=dk?8:0,out=[];
+  for(let i=0;i<n;i++){
+    const t=n===1?0:i/(n-1);let h,s,l;
+    if(mode==='analogous'){h=(base+(i-(n-1)/2)*24+360)%360;s=rnd(52,85)+sB;l=top-t*span;}
+    else if(mode==='complement'){h=(base+(i%2?180:0)+rnd(-12,12)+360)%360;s=rnd(50,88)+sB;l=top-t*(span+2);}
+    else if(mode==='triad'){h=(base+[0,120,240][i%3]+rnd(-14,14)+360)%360;s=rnd(55,90)+sB;l=(top-2)-t*(span-4);}
+    else if(mode==='mono'){h=(base+rnd(-7,7)+360)%360;s=rnd(35,78)+sB;l=(top+2)-t*(span+8);}
+    else{h=rnd(0,360);s=rnd(45,92)+sB;l=dk?rnd(34,74):rnd(28,80);}
+    out.push({h,s:Math.min(96,s),l,locked:false,open:false});
+  }
+  return out;
+}
+function generate(){
+  const n=colors.length||5;
+  imageMode=false;
+  colors=build(n).map((c,i)=>colors[i]&&colors[i].locked?colors[i]:c);
+  render();syncHash();
+}
+
+/* ===== استخراج الألوان من صورة =====
+   التجميع يجري في فضاء OKLab الإدراكي، واللون الناتج يُنتقى من
+   بكسلات الصورة الحقيقية بدل حساب متوسط يعطي لونًا موحلًا. */
+function srgbToOklab(r,g,b){
+  const f=v=>{v/=255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
+  const R=f(r),G=f(g),B=f(b);
+  const l=Math.cbrt(0.4122214708*R+0.5363325363*G+0.0514459929*B);
+  const m=Math.cbrt(0.2119034982*R+0.6806995451*G+0.1073969566*B);
+  const t=Math.cbrt(0.0883024619*R+0.2817188376*G+0.6299787005*B);
+  return[0.2104542553*l+0.7936177850*m-0.0040720468*t,
+         1.9779984951*l-2.4285922050*m+0.4505937099*t,
+         0.0259040371*l+0.7827717662*m-0.8086757660*t];
+}
+const labDist=(a,b)=>{const d0=a[0]-b[0],d1=a[1]-b[1],d2=a[2]-b[2];return d0*d0+d1*d1+d2*d2;};
+
+/* رصّ البكسلات في سلال 5-بت مع الاحتفاظ بمجموع القيم الأصلية
+   حتى يبقى لون كل سلة دقيقًا لا تقريبيًا */
+function histogram(data){
+  const map=new Map();
+  for(let i=0;i<data.length;i+=4){
+    if(data[i+3]<125)continue;
+    const r=data[i],g=data[i+1],b=data[i+2];
+    const key=((r>>3)<<10)|((g>>3)<<5)|(b>>3);
+    const e=map.get(key);
+    if(e){e.n++;e.r+=r;e.g+=g;e.b+=b;}
+    else map.set(key,{n:1,r:r,g:g,b:b});
+  }
+  const out=[];
+  for(const e of map.values()){
+    const r=e.r/e.n,g=e.g/e.n,b=e.b/e.n;
+    out.push({r:r,g:g,b:b,n:e.n,lab:srgbToOklab(r,g,b)});
+  }
+  return out;
+}
+
+/* k-means موزون ببداية k-means++ حتمية: نفس الصورة تعطي نفس اللوحة دائمًا */
+function cluster(pts,k){
+  const centers=[];
+  let seed=pts[0];
+  for(const p of pts)if(p.n>seed.n)seed=p;
+  centers.push(seed.lab.slice());
+  const best=new Array(pts.length).fill(Infinity);
+  while(centers.length<k){
+    let pick=null,score=-1;
+    const c=centers[centers.length-1];
+    for(let i=0;i<pts.length;i++){
+      const d=labDist(pts[i].lab,c);
+      if(d<best[i])best[i]=d;
+      const sc=best[i]*Math.sqrt(pts[i].n);
+      if(sc>score){score=sc;pick=pts[i];}
+    }
+    if(!pick||score<=0)break;
+    centers.push(pick.lab.slice());
+  }
+  const assign=new Array(pts.length).fill(0);
+  for(let it=0;it<14;it++){
+    let moved=false;
+    for(let i=0;i<pts.length;i++){
+      let bi=0,bd=Infinity;
+      for(let c=0;c<centers.length;c++){
+        const d=labDist(pts[i].lab,centers[c]);
+        if(d<bd){bd=d;bi=c;}
+      }
+      if(assign[i]!==bi){assign[i]=bi;moved=true;}
+    }
+    const sum=centers.map(()=>[0,0,0,0]);
+    for(let i=0;i<pts.length;i++){
+      const a=sum[assign[i]],p=pts[i];
+      a[0]+=p.lab[0]*p.n;a[1]+=p.lab[1]*p.n;a[2]+=p.lab[2]*p.n;a[3]+=p.n;
+    }
+    for(let c=0;c<centers.length;c++){
+      if(sum[c][3])centers[c]=[sum[c][0]/sum[c][3],sum[c][1]/sum[c][3],sum[c][2]/sum[c][3]];
+    }
+    if(!moved&&it>1)break;
+  }
+  const groups=centers.map((c,i)=>({center:c,weight:0,members:[]}));
+  for(let i=0;i<pts.length;i++){
+    const g=groups[assign[i]];
+    g.members.push(pts[i]);g.weight+=pts[i].n;
+  }
+  return groups.filter(g=>g.members.length).sort((a,b)=>b.weight-a.weight);
+}
+
+/* ممثّل العنقود: لون موجود فعلًا في الصورة، قريب من المركز وكثير التكرار */
+function representative(g){
+  let best=g.members[0],score=-1;
+  for(const m of g.members){
+    const sc=m.n/(1+70*labDist(m.lab,g.center));
+    if(sc>score){score=sc;best=m;}
+  }
+  return best;
+}
+
+function extractPalette(pts,k){
+  const groups=cluster(pts,Math.min(k,pts.length));
+  const out=[];
+  let gap=0.055;
+  for(let pass=0;pass<2&&out.length<k;pass++){
+    for(const g of groups){
+      if(out.length>=k)break;
+      if(g.picked)continue;
+      const rep=representative(g);
+      if(out.every(o=>labDist(o.lab,rep.lab)>=gap*gap)){out.push(rep);g.picked=true;}
+    }
+    gap=0;
+  }
+  return out;
+}
+
+function samplePixels(img){
+  const IW=img.naturalWidth||img.width,IH=img.naturalHeight||img.height;
+  if(!IW||!IH)throw new Error('أبعاد غير صالحة');
+  const max=340,sc=Math.min(1,max/Math.max(IW,IH));
+  const w=Math.max(1,Math.round(IW*sc));
+  const h=Math.max(1,Math.round(IH*sc));
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+  const ctx=cv.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(img,0,0,w,h);
+  return histogram(ctx.getImageData(0,0,w,h).data);
+}
+
+function extractFromImage(){
+  if(!pixels||!pixels.length){toast('لا توجد صورة لاستخراج ألوانها');return;}
+  const n=colors.length||5;
+  const free=colors.filter(c=>!c.locked).length||n;
+  const pal=extractPalette(pixels,Math.max(1,free))
+    .map(p=>{const{h,s,l}=rgbToHsl(p.r,p.g,p.b);return{h:h,s:s,l:l,locked:false,open:false};})
+    .sort((a,b)=>b.l-a.l);
+  let k=0;
+  colors=colors.map(c=>c.locked?c:(pal[k++]||c));
+  imageMode=true;render();syncHash();
+}
+
+/* فك الترميز مباشرة من الملف — بلا blob: ولا <img>، فلا تعترضه سياسات الأمان */
+function decodeImage(file){
+  if(typeof createImageBitmap==='function'){
+    return createImageBitmap(file).catch(()=>decodeViaDataUrl(file));
+  }
+  return decodeViaDataUrl(file);
+}
+function decodeViaDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const im=new Image();
+      im.onload=()=>resolve(im);
+      im.onerror=()=>reject(new Error('فشل فك الترميز'));
+      im.src=fr.result;
+    };
+    fr.onerror=()=>reject(new Error('فشلت قراءة الملف'));
+    fr.readAsDataURL(file);
+  });
+}
+function drawThumb(src){
+  const cv=document.getElementById('thumb'),ctx=cv.getContext('2d');
+  const IW=src.naturalWidth||src.width,IH=src.naturalHeight||src.height;
+  const side=Math.min(IW,IH),sx=(IW-side)/2,sy=(IH-side)/2;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.drawImage(src,sx,sy,side,side,0,0,cv.width,cv.height);
+}
+function loadImage(file){
+  if(!file)return;
+  if(!/^image\//.test(file.type||'')){toast(t('t_notimg'));return;}
+  decodeImage(file).then(src=>{
+    pixels=samplePixels(src);
+    if(!pixels.length){toast('الصورة شفافة بالكامل — لا توجد ألوان');return;}
+    drawThumb(src);
+    document.getElementById('shotName').textContent=file.name||'صورة ملصقة';
+    document.getElementById('shot').hidden=false;
+    extractFromImage();
+    toast(t('t_extracted'));
+    if(src.close)src.close();
+  }).catch(err=>{
+    console.error('فشل تحميل الصورة:',err);
+    toast(t('t_decode'));
+  });
+}
+
+/* ===== الرسم ===== */
+function render(){
+  grid.innerHTML='';
+  colors.forEach((c,i)=>{
+    const hex=hexOf(c);
+    const card=document.createElement('article');
+    card.className='card'+(c.locked?' locked':'')+(c.open?' open':'');
+    card.style.transform=`rotate(${TILT[i%TILT.length]}deg)`;
+    card.style.animationDelay=(i*55)+'ms';
+
+    const well=document.createElement('button');
+    well.className='well';well.style.background=hex;
+    well.setAttribute('aria-label','نسخ '+hex);
+    well.innerHTML=`<span class="badge">${nearestName(c)}</span>`;
+    well.addEventListener('click',()=>copy(fmtOf(c,fmt),hex));
+    card.appendChild(well);
+
+    const pin=document.createElement('button');
+    pin.className='pin';pin.textContent=c.locked?'📌':'📍';
+    pin.setAttribute('aria-pressed',c.locked);
+    pin.setAttribute('aria-label',c.locked?'فتح قفل اللون':'قفل اللون');
+    pin.addEventListener('click',()=>{c.locked=!c.locked;render();});
+    card.appendChild(pin);
+
+    if(colors.length>3){
+      const kill=document.createElement('button');
+      kill.className='kill';kill.textContent='×';
+      kill.setAttribute('aria-label','حذف اللون');
+      kill.addEventListener('click',()=>{
+        colors.splice(i,1);
+        if(imageMode)extractFromImage();else{render();syncHash();}
+      });
+      card.appendChild(kill);
+    }
+
+    const foot=document.createElement('div');foot.className='foot';
+
+    const code=document.createElement('button');
+    code.className='code';code.textContent=fmtOf(c,fmt);
+    code.setAttribute('aria-label','نسخ '+hex);
+    code.addEventListener('click',()=>copy(fmtOf(c,fmt),hex));
+    foot.appendChild(code);
+
+    const shades=document.createElement('div');shades.className='shades';
+    shadeLevels().forEach(L=>{
+      const sc={h:c.h,s:Math.max(12,c.s*(L>78||L<28?.82:1)),l:L};
+      const b=document.createElement('button');
+      b.style.background=hexOf(sc);b.title=hexOf(sc);
+      b.setAttribute('aria-label','نسخ '+hexOf(sc));
+      b.addEventListener('click',()=>copy(fmtOf(sc,fmt),hexOf(sc)));
+      shades.appendChild(b);
+    });
+    foot.appendChild(shades);
+
+    const sb=document.createElement('button');
+    sb.className='shadesBtn';sb.textContent=c.open?t('shades_hide'):t('shades');
+    sb.setAttribute('aria-expanded',!!c.open);
+    sb.addEventListener('click',()=>{c.open=!c.open;render();});
+    foot.appendChild(sb);
+
+    card.appendChild(foot);
+    grid.appendChild(card);
+  });
+
+  if(colors.length<7){
+    const add=document.createElement('button');
+    add.className='add';
+    add.innerHTML='<span>+</span>'+t('add_color');
+    add.style.animationDelay=(colors.length*55)+'ms';
+    add.addEventListener('click',()=>{
+      colors.push({h:rnd(0,360),s:rnd(45,92),l:isDark()?rnd(34,74):rnd(28,80),locked:false,open:false});
+      if(imageMode)extractFromImage();else{render();syncHash();}
+    });
+    grid.appendChild(add);
+  }
+}
+
+/* ===== النسخ ===== */
+let tt;
+function toast(msg,sw){
+  const t=document.getElementById('toast');
+  t.innerHTML=(sw?`<i style="background:${sw}"></i>`:'')+`<span>${msg}</span>`;
+  t.classList.add('show');clearTimeout(tt);
+  tt=setTimeout(()=>t.classList.remove('show'),1700);
+}
+function copy(text,sw){
+  const ok=()=>toast(t('t_copied')+' <code>'+text.split('\n')[0]+(text.includes('\n')?' …':'')+'</code>',sw);
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(ok).catch(()=>fb(text,ok));
+  }else fb(text,ok);
+}
+function fb(text,ok){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;opacity:0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');ok();}catch(e){toast(t('t_copy_fail'));}
+  ta.remove();
+}
+
+/* ===== التحكم ===== */
+document.getElementById('gen').addEventListener('click',generate);
+document.getElementById('harmony').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  mode=b.dataset.h;
+  [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed',x===b));
+  generate();
+});
+document.getElementById('format').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  fmt=b.dataset.f;
+  [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed',x===b));
+  render();
+});
+document.getElementById('copyAll').addEventListener('click',()=>{
+  copy(colors.map(c=>fmtOf(c,fmt)).join(', '));
+});
+document.getElementById('copyCss').addEventListener('click',()=>{
+  copy(':root {\n'+colors.map((c,i)=>`  --color-${i+1}: ${fmtOf(c,fmt)}; /* ${nearestName(c)} */`).join('\n')+'\n}');
+});
+document.getElementById('shift').addEventListener('input',e=>{
+  shift=parseFloat(e.target.value)||0;
+  document.getElementById('shiftVal').textContent=shift.toFixed(2);
+  render();
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,textarea,select'))return;
+  if(e.code==='Space'){e.preventDefault();generate();}
+});
+
+/* ===== قائمة اللغة ===== */
+const langSel=document.getElementById('lang');
+Object.keys(I18N).forEach(code=>{
+  const o=document.createElement('option');
+  o.value=code;o.textContent=LANG_NAMES[code]||code;
+  langSel.appendChild(o);
+});
+langSel.addEventListener('change',e=>{lang=e.target.value;applyLang();});
+
+/* ===== رفع الصورة: نقر، سحب، لصق ===== */
+const fileInput=document.getElementById('file'),dropEl=document.getElementById('drop'),
+      overlay=document.getElementById('overlay');
+fileInput.addEventListener('change',e=>{loadImage(e.target.files&&e.target.files[0]);fileInput.value='';});
+document.getElementById('clearShot').addEventListener('click',e=>{
+  e.preventDefault();
+  pixels=null;imageMode=false;
+  const cv=document.getElementById('thumb');
+  cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+  document.getElementById('shot').hidden=true;
+  toast(t('t_removed'));
+});
+
+let dragDepth=0;
+function hasFiles(e){return e.dataTransfer&&[...(e.dataTransfer.types||[])].includes('Files');}
+document.addEventListener('dragenter',e=>{
+  if(!hasFiles(e))return;e.preventDefault();dragDepth++;overlay.classList.add('show');
+});
+document.addEventListener('dragover',e=>{if(hasFiles(e))e.preventDefault();});
+document.addEventListener('dragleave',e=>{
+  if(!hasFiles(e))return;dragDepth=Math.max(0,dragDepth-1);
+  if(!dragDepth)overlay.classList.remove('show');
+});
+document.addEventListener('drop',e=>{
+  if(!hasFiles(e))return;
+  e.preventDefault();dragDepth=0;overlay.classList.remove('show');
+  loadImage(e.dataTransfer.files&&e.dataTransfer.files[0]);
+});
+dropEl.addEventListener('dragenter',()=>dropEl.classList.add('over'));
+dropEl.addEventListener('dragleave',()=>dropEl.classList.remove('over'));
+dropEl.addEventListener('drop',()=>dropEl.classList.remove('over'));
+document.addEventListener('paste',e=>{
+  const items=[...((e.clipboardData&&e.clipboardData.items)||[])];
+  const it=items.find(i=>i.type&&i.type.indexOf('image/')===0);
+  if(it)loadImage(it.getAsFile());
+});
+
+/* ===== مشاركة اللوحة في الرابط ===== */
+let canHash=true;
+function syncHash(){
+  if(!canHash)return;
+  try{history.replaceState(null,'','#'+colors.map(c=>hexOf(c).slice(1)).join('-'));}
+  catch(err){canHash=false;}
+}
+function fromHash(){
+  try{
+    const p=(location.hash||'').replace('#','').split('-').filter(x=>/^[0-9a-fA-F]{6}$/.test(x));
+    if(p.length<3||p.length>7)return false;
+    colors=p.map(x=>{
+      const{r,g,b}=hexToRgb(x),{h,s,l}=rgbToHsl(r,g,b);
+      return{h,s,l,locked:false,open:false};
+    });
+    return true;
+  }catch(err){return false;}
+}
+
+/* ===== الإقلاع ===== */
+try{
+  const nav=((navigator.language||'ar').slice(0,2)).toLowerCase();
+  if(I18N[nav])lang=nav;
+  langSel.value=lang;
+  if(!fromHash())colors=build(5);
+  applyLang();
+  syncHash();
+}catch(err){
+  colors=build(5);render();
+  console.error('تعذّر الإقلاع الطبيعي:',err);
+}
+</script>
+</body>
+</html>
